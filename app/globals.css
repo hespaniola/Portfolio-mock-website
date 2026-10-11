@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b0a09;
+  --color-ink-raise: #141210;
+  --color-bone: #ece6dc;
+  --color-bone-dim: #a39b8f;
+  --color-ash: #6d665d;
+  --color-line: rgb(236 230 220 / 0.12);
+  --color-amber: #c8773a;
+  --color-amber-soft: #e0a46e;
+
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-cine: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-bone);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* No background on body: the fixed glow layer sits between html and content. */
+body {
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-amber);
+  color: var(--color-ink);
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* Custom cursor hides the native one on fine pointers */
+@media (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* Text helpers */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-bone-dim);
+}
+
+/* Masked line used by reveal animations; padding keeps descenders visible */
+.mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+/* Animated underline for text links */
+.link-line {
+  position: relative;
+}
+.link-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.15em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.7s var(--ease-cine);
+}
+.link-line:hover::after,
+.link-line:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Background glow: two soft blobs drifting slowly */
+.glow-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  will-change: transform;
+}
+@keyframes drift-a {
+  0% { transform: translate3d(-10%, -5%, 0) scale(1); }
+  50% { transform: translate3d(15%, 10%, 0) scale(1.15); }
+  100% { transform: translate3d(-5%, 20%, 0) scale(0.95); }
+}
+@keyframes drift-b {
+  0% { transform: translate3d(10%, 10%, 0) scale(1.1); }
+  50% { transform: translate3d(-15%, -5%, 0) scale(0.9); }
+  100% { transform: translate3d(5%, -15%, 0) scale(1.05); }
+}
+.glow-a { animation: drift-a 38s ease-in-out infinite alternate; }
+.glow-b { animation: drift-b 46s ease-in-out infinite alternate; }
+
+/* Film grain: a noise tile that jitters a few times a second */
+@keyframes grain {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10% { transform: translate3d(-5%, -10%, 0); }
+  30% { transform: translate3d(3%, -15%, 0); }
+  50% { transform: translate3d(12%, 9%, 0); }
+  70% { transform: translate3d(9%, 4%, 0); }
+  90% { transform: translate3d(-1%, 7%, 0); }
+}
+.grain {
+  position: absolute;
+  inset: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(6) infinite;
+  will-change: transform;
+}
+
+/* Testimonials marquee */
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-track {
+  animation: marquee 80s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Slow drift on video posters so they never feel frozen */
+@keyframes kenburns {
+  from { transform: scale(1.04) translate3d(0, 0, 0); }
+  to { transform: scale(1.14) translate3d(-1.5%, -1%, 0); }
+}
+.kenburns {
+  animation: kenburns 24s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-a,
+  .glow-b,
+  .grain,
+  .kenburns,
+  .marquee-track {
+    animation: none !important;
+  }
+  .marquee-track {
+    flex-wrap: wrap;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-amber);
+  outline-offset: 4px;
+}
